@@ -61,7 +61,6 @@ def build_server():
         f"pyinstaller main.py --workpath ../build --distpath ../dist --windowed --specpath ../build --name DSL --icon ../images/icon.ico --uac-admin --clean --noconfirm",
         shell=True,
     )
-    print(proc.stdout.decode())
     proc.check_returncode()
     os.chdir("..")
 
