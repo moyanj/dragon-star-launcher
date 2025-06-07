@@ -58,7 +58,7 @@ def build_web():
 def build_server():
     os.chdir("src")
     proc = subprocess.run(
-        f"{PYTHON} -m PyInstaller main.py --workpath ../build --distpath ../dist --windowed --specpath ../build --name DSL --icon ../images/icon.ico --uac-admin --clean --noconfirm",
+        f"pyinstaller main.py --workpath ../build --distpath ../dist --windowed --specpath ../build --name DSL --icon ../images/icon.ico --uac-admin --clean --noconfirm",
         shell=True,
     )
     print(proc.stdout.decode())
