@@ -1,0 +1,85 @@
+name: Build Workflow
+
+on: push
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  build_web:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "22"
+          cache: "pnpm"
+          cache-dependency-path: "web/pnpm-lock.yaml"
+      - name: Install dependencies
+        run: |
+          echo "Installing Node.js dependencies..."
+          cd web
+          pnpm install
+      - name: Build web
+        run: |
+          echo "Building web project..."
+          cd web
+          pnpm run build
+      - name: Upload web
+        uses: actions/upload-artifact@v4
+        with:
+          name: web
+          path: web/dist
+
+  build:
+    needs: build_web
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          echo "Installing Python dependencies..."
+          python -m pip install uv
+          uv pip install --system -r pyproject.toml
+
+      - name: Install GTK
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          echo "Installing GTK dependencies..."
+          sudo apt-get install libgirepository-1.0-dev libcairo2-dev libglib2.0-dev
+          uv pip install --system -r pyproject.toml --extra gtk
+
+      - name: Download web
+        uses: actions/download-artifact@v4
+        with:
+          name: web
+          path: web/dist
+
+      - name: Build
+        run: |
+          echo "Running Python build script..."
+          python build.py no-web
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: HoYoCenter-${{ matrix.os }}-${{ github.sha }}
+          path: dist/HoYoCenter.zip
+          compression-level: 0
+          retention-days: 7
