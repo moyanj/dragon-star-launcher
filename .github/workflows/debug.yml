@@ -62,7 +62,7 @@ jobs:
       - name: Build
         run: |
           echo "Running Python build script..."
-          .venv/bin/activate.bat
+          call .venv\Scripts\activate.bat
           python build.py no-web
 
       - name: Upload build
