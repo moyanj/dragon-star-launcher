@@ -51,7 +51,7 @@ jobs:
         run: |
           echo "Installing Python dependencies..."
           python -m pip install uv
-          uv pip install --system -r pyproject.toml
+          uv sync
 
       - name: Download web
         uses: actions/download-artifact@v4
