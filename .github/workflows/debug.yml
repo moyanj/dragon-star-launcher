@@ -39,10 +39,7 @@ jobs:
 
   build:
     needs: build_web
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -58,13 +55,6 @@ jobs:
           python -m pip install uv
           uv pip install --system -r pyproject.toml
 
-      - name: Install GTK
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          echo "Installing GTK dependencies..."
-          sudo apt-get install libgirepository-1.0-dev libcairo2-dev libglib2.0-dev
-          uv pip install --system -r pyproject.toml --extra gtk
-
       - name: Download web
         uses: actions/download-artifact@v4
         with:
@@ -79,7 +69,7 @@ jobs:
       - name: Upload build
         uses: actions/upload-artifact@v4
         with:
-          name: HoYoCenter-${{ matrix.os }}-${{ github.sha }}
-          path: dist/HoYoCenter.zip
+          name: DSL-${{ github.sha }}
+          path: dist/DSL.zip
           compression-level: 0
           retention-days: 7
