@@ -46,8 +46,5 @@ async def api(request: Request):
     return Response(response)
 
 
-# 挂载静态文件目录
-app.mount("/", StaticFiles(directory=app_dir + "/dist", check_dir=False), name="dist")
-
 if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=6553, reload=True)

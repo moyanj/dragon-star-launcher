@@ -1,5 +1,5 @@
 <script setup lang="ts" async>
-import { ElMenu, ElMenuItem, ElButton } from "element-plus";
+import { ElMenu, ElMenuItem, ElButton, ElNotification } from "element-plus";
 import { ref, watch } from "vue";
 import { useGameList, server_url } from "./stores/server";
 import { rpc } from "./rpc";
@@ -19,11 +19,11 @@ watch(active, async () => {
 });
 
 watch(status, () => {
-    if (status.value == "ready") {
+    if (status.value == "installed") {
         status_text.value = "开始游戏";
-    } else if (status.value == "downloading") {
+    } else if (status.value == "installing") {
         status_text.value = "下载中";
-    } else if (status.value == "empty") {
+    } else if (status.value == "download") {
         status_text.value = "下载游戏";
     }
 });
@@ -31,6 +31,23 @@ watch(status, () => {
 active.value = game_list.value[0];
 function changeMenu(id: string) {
     active.value = id;
+}
+
+async function handler() {
+    if (status.value == "installed") {
+        await rpc.call("start_game", status.value)
+        ElNotification({
+            title: "提示",
+            message: "游戏已启动",
+            type: "success",
+        });
+    } else if (status.value == "download") {
+        ElNotification({
+            title: "提示",
+            message: "游戏下载开始",
+            type: "info",
+        });
+    }
 }
 
 </script>
@@ -56,13 +73,19 @@ function changeMenu(id: string) {
         </el-menu>
     </div>
     <div class="content" :style="{ backgroundImage: `url(${server_url}game_background/${active}.jpg)` }">
-        <div class="start">
+        <div class="start" @click="handler">
             <div class="status">
-                <div class="status-ready">
+                <div class="status-ready" v-if="status === 'ready'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"
-                        class="ready-icon">
+                        class="status-icon">
                         <path fill="currentColor"
                             d="M8 17.175V6.825q0-.425.3-.713t.7-.287q.125 0 .263.037t.262.113l8.15 5.175q.225.15.338.375t.112.475t-.112.475t-.338.375l-8.15 5.175q-.125.075-.262.113T9 18.175q-.4 0-.7-.288t-.3-.712" />
+                    </svg>
+                </div>
+                <div class="status-no" v-if="status === 'download'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24">
+                        <path fill="currentColor"
+                            d="M5 10H4V8h2v1h1v1h1v1h1v1h1v1h1V1h2v12h1v-1h1v-1h1v-1h1V9h1V8h2v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-2v-1h-1v-1H9v-1H8v-1H7v-1H6v-1H5zM2 21h20v2H2z" />
                     </svg>
                 </div>
             </div>
@@ -136,7 +159,7 @@ function changeMenu(id: string) {
     place-items: center;
     grid-template-columns: 33% 66%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    /*border: 2px solid #333000;*/
+    cursor: pointer;
 }
 
 .status {
@@ -149,7 +172,7 @@ function changeMenu(id: string) {
     justify-content: center;
 }
 
-.ready-icon {
+.status-icon {
     width: 35px;
     height: 35px;
 }

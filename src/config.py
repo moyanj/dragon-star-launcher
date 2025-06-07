@@ -48,36 +48,8 @@ class BetterDict(EasyDict):
 
 class Config(BetterDict):
     def __init__(self, conf: dict):
-        base = {
-            "theme": "auto",
-            "user_name": "用户",
-            "use_enka": False,
-            "step": 0,
-            "game": {
-                "ys": {
-                    "enable": False,
-                    "uid": "",
-                },
-                "sr": {
-                    "enable": False,
-                    "uid": "",
-                },
-            },
-            "enka": {
-                "ys": "enka",
-                "sr": "enka",
-            },
-            "user": {
-                "name": "",
-                "uid": "",
-                "ltoken_v1": "",
-                "ltoken_v2": "",
-                "game_token": "",
-                "mid": "",
-                "cookie_token": "",
-                "fp": "",
-            },
-            "init": False,
-        }
+        from env import app_dir
+
+        base = {"game_path": app_dir + "/games"}
         base = merge_dict(base, conf)
         super().__init__(base)

@@ -49,3 +49,5 @@ else:
     config_fp.seek(0)
 
 config = Config(json.load(config_fp))  # 配置文件
+
+os.makedirs(config.game_path, exist_ok=True)  # type: ignore

@@ -1,11 +1,6 @@
 from jsonrpcserver import method, Result, Success, Error
 import os
-import utils
-import hashlib
-import base64
-import platform
 from env import *
-import webview
 
 
 @method(name="data.config")
