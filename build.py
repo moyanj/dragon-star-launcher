@@ -57,8 +57,12 @@ def build_web():
 
 def build_server():
     os.chdir("src")
+    if "debug" in sys.argv:
+        extra = "--windowed"
+    else:
+        extra = ""
     proc = subprocess.run(
-        f"pyinstaller main.py --workpath ../build --distpath ../dist --specpath ../build --name DSL --icon ../images/icon.ico --uac-admin --clean --noconfirm",
+        f"pyinstaller main.py --workpath ../build --distpath ../dist --specpath ../build --name DSL --icon ../images/icon.ico --uac-admin --clean --noconfirm {extra}",
         shell=True,
     )
     proc.check_returncode()

@@ -1,3 +1,4 @@
+import multiprocessing
 import webview
 import click
 from server import app as flask
@@ -133,4 +134,6 @@ def main(debug, width, height, minimized, renderer):
 
 
 if __name__ == "__main__":
+    if not is_linux:
+        multiprocessing.freeze_support()
     main()

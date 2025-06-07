@@ -63,7 +63,7 @@ jobs:
         run: |
           echo "Running Python build script..."
           .venv\Scripts\activate.ps1
-          python build.py no-web
+          python build.py no-web debug
 
       - name: Upload build
         uses: actions/upload-artifact@v4
