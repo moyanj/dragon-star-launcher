@@ -135,5 +135,5 @@ def main(debug, width, height, minimized, renderer):
 
 if __name__ == "__main__":
     if not is_linux:
-        multiprocessing.freeze_support()
+        multiprocessing.freeze_support()  # 修复Windows下打包后的问题
     main()
