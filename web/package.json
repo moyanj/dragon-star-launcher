@@ -14,9 +14,11 @@
     "element-plus": "^2.10.1",
     "jsonrpctts": "^1.0.0",
     "pinia": "^3.0.1",
+    "unplugin-element-plus": "^0.10.0",
     "vue": "^3.5.13"
   },
   "devDependencies": {
+    "@mistjs/vite-plugin-px2viewport": "^0.1.0",
     "@tsconfig/node22": "^22.0.1",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-vue": "^5.2.3",

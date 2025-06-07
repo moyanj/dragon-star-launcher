@@ -8,11 +8,11 @@ if (import.meta.env.DEV) {
 }
 
 interface RPCFunction {
-    "requests.get": (url: string, params?: object, headers?: object) => Response;
+    "get_game_status": (name: string) => string;
     "requests.post": (url: string, params?: object, headers?: object) => Response;
     "requests.req": (method: string, url: string, params?: object, headers?: object) => Response;
 }
 
-const rpc = new RPCClient<RPCFunction>({
+export const rpc = new RPCClient<RPCFunction>({
     "endpoint": base_api
 })
