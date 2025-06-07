@@ -8,7 +8,7 @@ import time
 import re
 
 NPM = "pnpm"
-PYTHON = "python"
+PYTHON = sys.executable
 
 pattern = r'version\s*=\s*"(\d+\.\d+\.\d+)"'
 
@@ -21,9 +21,9 @@ def clean_build():
 
 
 def make_zip():
-    zip = zipfile.ZipFile("dist/HoYoCenter.zip", "w", zipfile.ZIP_DEFLATED)
-    for path, dirnames, filenames in os.walk("dist/HoYoCenter"):
-        fpath = path.replace("dist/HoYoCenter", "")
+    zip = zipfile.ZipFile("dist/DSL.zip", "w", zipfile.ZIP_DEFLATED)
+    for path, dirnames, filenames in os.walk("dist/DSL"):
+        fpath = path.replace("dist/DSL", "")
 
         for filename in filenames:
             zip.write(os.path.join(path, filename), os.path.join(fpath, filename))
@@ -58,7 +58,7 @@ def build_web():
 def build_server():
     os.chdir("src")
     subprocess.run(
-        f"pyinstaller main.py --workpath ../build --distpath ../dist --windowed --specpath ../build --name HoYoCenter --icon ../images/icon.ico --uac-admin --clean --noconfirm",
+        f"{PYTHON} -m PyInstaller main.py --workpath ../build --distpath ../dist --windowed --specpath ../build --name DSL --icon ../images/icon.ico --uac-admin --clean --noconfirm",
         shell=True,
         check=True,
     )
@@ -67,8 +67,8 @@ def build_server():
 
 def copy_data():
 
-    shutil.copytree("web/dist", "dist/HoYoCenter/dist", dirs_exist_ok=True)
-    with open("dist/HoYoCenter/build_info.json", "w") as f:
+    shutil.copytree("web/dist", "dist/DSL/dist", dirs_exist_ok=True)
+    with open("dist/DSL/build_info.json", "w") as f:
         json.dump(make_build_info(), f)
 
 
