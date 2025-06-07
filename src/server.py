@@ -46,5 +46,8 @@ async def api(request: Request):
     return Response(response)
 
 
+if not DEBUG:
+    app.mount("/", StaticFiles(directory=app_dir + "/dist"), name="static")
+
 if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=6553, reload=True)
