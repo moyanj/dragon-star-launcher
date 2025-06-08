@@ -58,6 +58,8 @@ class Config(BetterDict):
 class ServerConfig:
     def __init__(self, conf: dict | None = None):
         self.conf = conf
+        self.dict = {c["id"]: c for c in conf}  # type: ignore
 
     def set_conf(self, conf: dict):
         self.conf = conf
+        self.dict = {c["id"]: c for c in conf}  # type: ignore
