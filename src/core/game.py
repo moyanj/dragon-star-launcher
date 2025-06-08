@@ -19,7 +19,7 @@ def uninstall_game(name: str):
     installed_file = os.path.join(game_path, "installed")
 
     # 检查游戏是否已安装
-    if not os.path.exists(installed_file):
+    if not os.path.exists(installed_file) or not os.path.exists(installed_files_path):
         return False
 
     try:
