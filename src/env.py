@@ -16,6 +16,7 @@ __all__ = [
 ]
 
 DEBUG = True if "--debug" in sys.argv else False  # 是否为调试模式
+SERVER_URL = "http://222.186.150.90:13336/"
 app_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 try:

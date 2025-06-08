@@ -3,6 +3,8 @@ import { ElMenu, ElMenuItem, ElButton, ElNotification } from "element-plus";
 import { ref, watch } from "vue";
 import { useGameList, server_url } from "./stores/server";
 import { rpc } from "./rpc";
+import { RPCError } from "jsonrpctts";
+import { ca } from "element-plus/es/locales.mjs";
 const game_list = useGameList();
 const active = ref();
 const status = ref("ready")
@@ -35,18 +37,37 @@ function changeMenu(id: string) {
 
 async function handler() {
     if (status.value == "installed") {
-        await rpc.call("start_game", status.value)
-        ElNotification({
-            title: "提示",
-            message: "游戏已启动",
-            type: "success",
-        });
-    } else if (status.value == "download") {
+        try {
+            await rpc.call("start_game", active.value)
+            // 游戏启动成功时显示成功提示
+            ElNotification({
+                title: "提示",
+                message: "游戏启动成功",
+                type: "success",
+            });
+        } catch (e) {
+            if (e instanceof RPCError) {
+                ElNotification({
+                    title: "错误",
+                    message: e.message,
+                    type: "error",
+                });
+            } else {
+                ElNotification({
+                    title: "错误",
+                    message: "游戏启动失败",
+                    type: "error",
+                });
+            }
+        }
+    } else if (status.value == "download", active.value) {
         ElNotification({
             title: "提示",
             message: "游戏下载开始",
             type: "info",
         });
+        await rpc.call("download_game", active.value)
+        status.value = await rpc.call("get_game_status", active.value);
     }
 }
 
@@ -85,7 +106,7 @@ async function handler() {
                 <div class="status-no" v-if="status === 'download'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24">
                         <path fill="currentColor"
-                            d="M5 10H4V8h2v1h1v1h1v1h1v1h1v1h1V1h2v12h1v-1h1v-1h1v-1h1V9h1V8h2v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-2v-1h-1v-1H9v-1H8v-1H7v-1H6v-1H5zM2 21h20v2H2z" />
+                            d="M5 10H4V8h2v1h1v1h1v1h1v1h1v1h1V1h2v12h1v-1h1v-1h1v-1h1V9h1V8h2v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-2v-1h-1v-1H9v-1H8v-1H7v-1H6v-1H5zM2 21h20v2H2z" />
                     </svg>
                 </div>
             </div>

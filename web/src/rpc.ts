@@ -10,7 +10,7 @@ if (import.meta.env.DEV) {
 interface RPCFunction {
     "get_game_status": (name: string) => string;
     "start_game": (name: string) => string;
-    "requests.req": (method: string, url: string, params?: object, headers?: object) => Response;
+    "download_game": (name: string) => string;
 }
 
 export const rpc = new RPCClient<RPCFunction>({
