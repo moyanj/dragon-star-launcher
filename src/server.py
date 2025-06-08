@@ -10,7 +10,7 @@ from env import *  # 所有全局变量
 import core
 
 # 初始化FastAPI
-app = FastAPI(title="DSL-Server")
+app = FastAPI(title="StarGames-Server")
 
 # 配置CORS
 app.add_middleware(

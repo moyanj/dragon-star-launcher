@@ -60,7 +60,7 @@ def run_server(debug):
     port = utils.get_free_port()
     t = Process(
         target=_run_server,
-        name="DSL-Server",
+        name="StarGames-Server",
     )
     t.start()
     return f"http://127.0.0.1:{port}/", t
@@ -99,7 +99,7 @@ def main(debug, width, height, minimized, renderer):
     url, t = run_server(debug)
 
     window_args = {
-        "title": "龙星启动器",
+        "title": "Star Games",
         "width": width,
         "height": height,
         "minimized": minimized,
@@ -107,7 +107,7 @@ def main(debug, width, height, minimized, renderer):
     }
 
     start_args = {
-        "user_agent": "DragonStarLauncher-WebView/" + build_info["version"],
+        "user_agent": "StartGames-WebView/" + build_info["version"],
         "gui": renderer_dict[renderer],
         "storage_path": os.path.join(dirs.user_data_dir, "Web"),
     }
@@ -116,7 +116,7 @@ def main(debug, width, height, minimized, renderer):
     if debug:
         window_args.update(
             {
-                "title": "龙星启动器",
+                "title": "Star Games - Debug",
                 "text_select": True,
                 "url": "http://localhost:5173/",
             }

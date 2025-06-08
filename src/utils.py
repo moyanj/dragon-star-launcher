@@ -8,7 +8,7 @@ from env import *
 def restart():
     if DEBUG:
         command = " ".join(sys.argv)
-        command = "python " + command
+        command = f"{sys.executable} {command}"
     else:
         command = " ".join(sys.argv)
     subprocess.Popen(command)

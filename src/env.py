@@ -35,7 +35,7 @@ except:
 
 is_linux = sys.platform == "linux"
 
-dirs = PlatformDirs("DSL", ensure_exists=True)  # 平台目录
+dirs = PlatformDirs("StarGames", ensure_exists=True)  # 平台目录
 
 if os.path.exists(os.path.join(dirs.user_config_dir, "config.json")):
     config_fp = open(

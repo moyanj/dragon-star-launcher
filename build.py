@@ -21,9 +21,9 @@ def clean_build():
 
 
 def make_zip():
-    zip = zipfile.ZipFile("dist/DSL.zip", "w", zipfile.ZIP_DEFLATED)
-    for path, dirnames, filenames in os.walk("dist/DSL"):
-        fpath = path.replace("dist/DSL", "")
+    zip = zipfile.ZipFile("dist/StarGames.zip", "w", zipfile.ZIP_DEFLATED)
+    for path, dirnames, filenames in os.walk("dist/StarGames"):
+        fpath = path.replace("dist/StarGames", "")
 
         for filename in filenames:
             zip.write(os.path.join(path, filename), os.path.join(fpath, filename))
@@ -62,7 +62,7 @@ def build_server():
     else:
         extra = ""
     proc = subprocess.run(
-        f"pyinstaller main.py --workpath ../build --distpath ../dist --specpath ../build --name DSL --icon ../images/icon.ico --uac-admin --clean --noconfirm {extra}",
+        f"pyinstaller main.py --workpath ../build --distpath ../dist --specpath ../build --name StarGames --icon ../images/icon.ico --uac-admin --clean --noconfirm {extra}",
         shell=True,
     )
     proc.check_returncode()
@@ -71,8 +71,8 @@ def build_server():
 
 def copy_data():
 
-    shutil.copytree("web/dist", "dist/DSL/dist", dirs_exist_ok=True)
-    with open("dist/DSL/build_info.json", "w") as f:
+    shutil.copytree("web/dist", "dist/StarGames/dist", dirs_exist_ok=True)
+    with open("dist/StarGames/build_info.json", "w") as f:
         json.dump(make_build_info(), f)
 
 
