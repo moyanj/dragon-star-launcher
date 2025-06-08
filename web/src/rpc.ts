@@ -11,8 +11,16 @@ interface RPCFunction {
     "get_game_status": (name: string) => string;
     "start_game": (name: string) => string;
     "download_game": (name: string) => string;
+    "get_download_progress": (n: string) => DownloadProgress;
 }
 
 export const rpc = new RPCClient<RPCFunction>({
     "endpoint": base_api + "/api"
 })
+
+
+export type DownloadProgress = {
+    percentage: number,
+    total_size: number,
+    downloaded: number,
+}

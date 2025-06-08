@@ -1,14 +1,16 @@
 <script setup lang="ts" async>
-import { ElMenu, ElMenuItem, ElButton, ElNotification } from "element-plus";
-import { ref, watch } from "vue";
+import { ElMenu, ElMenuItem, ElButton, ElNotification, ElProgress, ElPopover } from "element-plus";
+import { ref, watch, type Ref } from "vue";
 import { useGameList, server_url } from "./stores/server";
-import { rpc } from "./rpc";
+import { rpc, type DownloadProgress } from "./rpc";
 import { RPCError } from "jsonrpctts";
-import { ca } from "element-plus/es/locales.mjs";
+
 const game_list = useGameList();
 const active = ref();
 const status = ref("ready")
 const status_text = ref("开始游戏");
+let progressInterval: number | null = null;
+const download_progresses: Ref<{ [key: string]: DownloadProgress }> = ref({});
 
 watch(game_list, () => {
     active.value = game_list.value[0];
@@ -30,9 +32,46 @@ watch(status, () => {
     }
 });
 
-active.value = game_list.value[0];
+watch(status, async (newStatus) => {
+    if (newStatus === "installing") {
+        // 清除旧的定时器（如果存在）
+        if (progressInterval !== null) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+        // 启动新的定时器
+        await update_progress();
+        progressInterval = window.setInterval(async () => {
+            await update_progress();
+        }, 500); // 每秒更新一次
+    } else {
+        // 清理定时器
+        if (progressInterval !== null) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+    }
+});
+
 function changeMenu(id: string) {
     active.value = id;
+}
+
+async function update_progress() {
+    download_progresses.value[active.value] = await rpc.call("get_download_progress", active.value);
+    console.log(download_progresses.value);
+    if (download_progresses.value[active.value].percentage >= 100) {
+        ElNotification({
+            title: "提示",
+            message: "游戏下载完成",
+            type: "success",
+        });
+        status.value = await rpc.call("get_game_status", active.value);
+        if (progressInterval !== null) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+    }
 }
 
 async function handler() {
@@ -60,13 +99,18 @@ async function handler() {
                 });
             }
         }
-    } else if (status.value == "download", active.value) {
+    } else if (status.value == "download") {
         ElNotification({
             title: "提示",
             message: "游戏下载开始",
             type: "info",
         });
         await rpc.call("download_game", active.value)
+        download_progresses.value[active.value] = {
+            percentage: 0.0,
+            total_size: 0,
+            downloaded: 0,
+        };
         status.value = await rpc.call("get_game_status", active.value);
     }
 }
@@ -96,7 +140,7 @@ async function handler() {
     <div class="content" :style="{ backgroundImage: `url(${server_url}game_background/${active}.jpg)` }">
         <div class="start" @click="handler">
             <div class="status">
-                <div class="status-ready" v-if="status === 'ready'">
+                <div class="status-ready" v-if="status === 'installed'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"
                         class="status-icon">
                         <path fill="currentColor"
@@ -106,8 +150,17 @@ async function handler() {
                 <div class="status-no" v-if="status === 'download'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24">
                         <path fill="currentColor"
-                            d="M5 10H4V8h2v1h1v1h1v1h1v1h1v1h1V1h2v12h1v-1h1v-1h1v-1h1V9h1V8h2v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-2v-1h-1v-1H9v-1H8v-1H7v-1H6v-1H5zM2 21h20v2H2z" />
+                            d="M5 10H4V8h2v1h1v1h1v1h1v1h1V1h2v12h1v-1h1v-1h1v-1h1v-1h1V9h1V8h2v2h-1v1h-1v1h-1v1h-1v1h-1v1h-2v-1h-1v-1H9v-1H8v-1H7v-1H6v-1H5zM2 21h20v2H2z" />
                     </svg>
+                </div>
+                <div class="status-ing" v-if="status === 'installing'">
+                    <el-popover placement="top" trigger="hover">
+                        <template #reference>
+                            <span>{{ String(Math.floor(download_progresses[active]?.percentage || 0)).padStart(2, '0') }}.{{
+                                String(Math.floor(((download_progresses[active]?.percentage || 0) % 1) * 100)).padStart(2, '0') }}%</span>
+                        </template>
+                        <h1>2</h1>
+                    </el-popover>
                 </div>
             </div>
             <span class="text">{{ status_text }}</span>
@@ -202,6 +255,12 @@ async function handler() {
     width: 100%;
     line-height: 100%;
     text-align: center;
+}
+
+.el-progress {
+    height: 50px !important;
+    width: 50px !important;
+
 }
 </style>
 
