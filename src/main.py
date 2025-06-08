@@ -18,7 +18,7 @@ renderer_dict = {
     "gtk": "gtk",  # WebKit2GTK
     "qt": "qt",  # QTWebEngine
 }
-port = -1
+port =  utils.get_free_port()
 
 
 def has_webview():
@@ -51,13 +51,11 @@ def install_webview():
 
 
 def _run_server():
-    global port
     uvicorn.run(flask, host="127.0.0.1", port=port)
 
 
 def run_server(debug):
-    global port
-    port = utils.get_free_port()
+    print(port)
     t = Process(
         target=_run_server,
         name="StarGames-Server",
@@ -140,4 +138,4 @@ def main(debug, width, height, minimized, renderer):
 if __name__ == "__main__":
     if not is_linux:
         multiprocessing.freeze_support()  # 修复Windows下打包后的问题
-    main()
+    main() # type: ignore
