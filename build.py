@@ -58,11 +58,11 @@ def build_web():
 def build_server():
     os.chdir("src")
     if "debug" in sys.argv:
-        extra = "--windowed"
+        extra = "-w"
     else:
-        extra = ""
+        extra = "-c"
     proc = subprocess.run(
-        f"pyinstaller main.py --workpath ../build --distpath ../dist --specpath ../build --name StarGames --icon ../images/icon.ico --uac-admin --clean --noconfirm {extra}",
+        f"pyinstaller main.py --workpath ../build --distpath ../dist --specpath ../build --name StarGames --icon ../images/icon.ico --uac-admin --clean --noconfirm --contents-directory . {extra}",
         shell=True,
     )
     proc.check_returncode()
