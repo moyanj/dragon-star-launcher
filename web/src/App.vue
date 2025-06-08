@@ -121,7 +121,7 @@ async function handler() {
         ElNotification({
             title: "提示",
             message: "游戏下载开始",
-            type: "info",
+            type: "primary",
         });
         await rpc.call("download_game", active.value)
         download_progresses.value[active.value] = {
@@ -178,7 +178,7 @@ async function handler() {
                     <el-popover placement="top" trigger="hover">
                         <template #reference>
                             <span>{{ String(Math.floor(download_progresses[active]?.percentage || 0)).padStart(2, '0')
-                                }}.{{
+                            }}.{{
                                     String(Math.floor(((download_progresses[active]?.percentage || 0) % 1) *
                                         100)).padStart(2, '0') }}%</span>
                         </template>
