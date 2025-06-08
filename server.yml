@@ -1,0 +1,11 @@
+- id: test
+  name: Test游戏
+  description: 测试游戏
+  version: 1.0.0
+  version_code: 1
+
+- id: test2
+  name: Test游戏2
+  description: 测试游戏2
+  version: 1.0.0
+  version_code: 1

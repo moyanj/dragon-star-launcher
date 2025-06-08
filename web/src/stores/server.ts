@@ -1,13 +1,23 @@
 // composables/useGameList.ts
 import { ref } from 'vue';
+import { rpc } from '@/rpc';
 
-export const server_url = "http://222.186.150.90:13336/";
+export const server_url = "http://222.186.150.90:13336";
 
 // 模拟内存缓存（也可以根据需求使用 localStorage）
-let cachedGameList: string[] | null = null;
+let cachedGameList: Game[] | null = null;
+
+
+export type Game = {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  version_id: number;
+};
 
 export function useGameList() {
-  const game_list = ref<string[]>([]);
+  const game_list = ref<Game[]>([]);
 
   // 包装为 async 内部函数
   (async () => {
@@ -18,13 +28,9 @@ export function useGameList() {
     }
 
     try {
-      const response = await fetch(server_url + "game_list");
-      if (!response.ok) {
-        throw new Error(`HTTP请求失败: 状态码 ${response.status}`);
-      }
-
-      const text = await response.text();
-      const list = text.split('\n').filter(name => name.trim() !== '');
+      // @ts-ignore
+      const list = await rpc.call("data.server_config");
+      console.log(list);
 
       // 设置内存缓存
       cachedGameList = list;

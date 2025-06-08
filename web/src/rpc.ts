@@ -1,4 +1,5 @@
 import { RPCClient, type RPCClientConfig } from "jsonrpctts"
+import { type Game } from "./stores/server";
 
 export var base_api = "";
 if (import.meta.env.DEV) {
@@ -12,6 +13,7 @@ interface RPCFunction {
     "start_game": (name: string) => string;
     "download_game": (name: string) => string;
     "get_download_progress": (n: string) => DownloadProgress;
+    "data.server_config": () => Game[];
 }
 
 export const rpc = new RPCClient<RPCFunction>({

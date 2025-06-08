@@ -13,6 +13,11 @@ async def get_build_info():
     return Success(build_info)
 
 
+@method(name="data.server_config")
+async def get_server_config():
+    return Success(GameConfig.conf)
+
+
 @method(name="data.update_config")
 async def update_config(data: dict, save: bool = True):
     config.update(data)

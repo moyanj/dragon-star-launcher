@@ -5,12 +5,30 @@ from fastapi.middleware.cors import CORSMiddleware
 from jsonrpcserver import async_dispatch
 import uvicorn
 from utils import Rest
+from contextlib import asynccontextmanager
 from env import *  # 所有全局变量
-
+import httpx
+import yaml
+import tkinter.messagebox
+import sys
 import core
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{SERVER_URL}/game.yml")
+            response.raise_for_status()
+            GameConfig.set_conf(yaml.safe_load(response.text))
+    except Exception:
+        tkinter.messagebox.showerror("错误", "无法连接至服务器")
+        sys.exit(1)
+    yield
+
+
 # 初始化FastAPI
-app = FastAPI(title="StarGames-Server")
+app = FastAPI(title="StarGames-Server", lifespan=lifespan)
 
 # 配置CORS
 app.add_middleware(

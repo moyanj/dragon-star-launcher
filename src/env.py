@@ -2,7 +2,7 @@ import sys
 import json
 import os
 from platformdirs import PlatformDirs
-from config import Config
+from config import Config, ServerConfig
 
 from typing import Any
 
@@ -13,10 +13,12 @@ __all__ = [
     "app_dir",
     "config",
     "build_info",
+    "SERVER_URL",
+    "GameConfig",
 ]
 
 DEBUG = True if "--debug" in sys.argv else False  # 是否为调试模式
-SERVER_URL = "http://222.186.150.90:13336/"
+SERVER_URL = "http://222.186.150.90:13336"
 app_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 try:
@@ -52,3 +54,5 @@ else:
 config = Config(json.load(config_fp))  # 配置文件
 
 os.makedirs(config.game_path, exist_ok=True)  # type: ignore
+
+GameConfig = ServerConfig(None)

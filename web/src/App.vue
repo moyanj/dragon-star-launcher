@@ -7,13 +7,14 @@ import { RPCError } from "jsonrpctts";
 
 const game_list = useGameList();
 const active = ref();
-const status = ref("ready")
+const status = ref("download")
 const status_text = ref("开始游戏");
 let progressInterval: number | null = null;
 const download_progresses: Ref<{ [key: string]: DownloadProgress }> = ref({});
 
 watch(game_list, () => {
-    active.value = game_list.value[0];
+    console.log(game_list.value);
+    active.value = game_list.value[0].id;
 }, {
     once: true,
 });
@@ -142,9 +143,9 @@ async function handler() {
 
     <div class="menu">
         <el-menu :default-active="active" :collapse="false">
-            <el-menu-item v-for="item in game_list" @click="changeMenu(item)" :index="item"
+            <el-menu-item v-for="item in game_list" @click="changeMenu(item.id)" :index="item.id"
                 :class="{ 'is-active': active === item }">
-                <img :src="server_url + 'game_icon/' + item + '.png'" class="icon" />
+                <img :src="server_url + '/icon/' + item.id + '.png'" class="icon" />
             </el-menu-item>
 
             <div class="setting">
@@ -158,7 +159,7 @@ async function handler() {
             </div>
         </el-menu>
     </div>
-    <div class="content" :style="{ backgroundImage: `url(${server_url}game_background/${active}.jpg)` }">
+    <div class="content" :style="{ backgroundImage: `url(${server_url}/background/${active}.jpg)` }">
         <div class="start" @click="handler">
             <div class="status">
                 <div class="status-ready" v-if="status === 'installed'">
@@ -178,7 +179,7 @@ async function handler() {
                     <el-popover placement="top" trigger="hover">
                         <template #reference>
                             <span>{{ String(Math.floor(download_progresses[active]?.percentage || 0)).padStart(2, '0')
-                            }}.{{
+                                }}.{{
                                     String(Math.floor(((download_progresses[active]?.percentage || 0) % 1) *
                                         100)).padStart(2, '0') }}%</span>
                         </template>

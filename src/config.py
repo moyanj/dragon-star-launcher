@@ -53,3 +53,11 @@ class Config(BetterDict):
         base = {"game_path": app_dir + "/games"}
         base = merge_dict(base, conf)
         super().__init__(base)
+
+
+class ServerConfig:
+    def __init__(self, conf: dict | None = None):
+        self.conf = conf
+
+    def set_conf(self, conf: dict):
+        self.conf = conf
