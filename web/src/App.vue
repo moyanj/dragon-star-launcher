@@ -60,6 +60,19 @@ function changeMenu(id: string) {
 async function update_progress() {
     download_progresses.value[active.value] = await rpc.call("get_download_progress", active.value);
     console.log(download_progresses.value);
+    if (download_progresses.value[active.value].status == "failed") {
+        ElNotification({
+            title: "错误",
+            message: "下载失败：" + download_progresses.value[active.value].error_message,
+            type: "error",
+        });
+        status.value = await rpc.call("get_game_status", active.value);
+        if (progressInterval !== null) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+        return
+    }
     if (download_progresses.value[active.value].percentage >= 100) {
         ElNotification({
             title: "提示",
@@ -110,6 +123,8 @@ async function handler() {
             percentage: 0.0,
             total_size: 0,
             downloaded: 0,
+            status: "downloading",
+            error_message: ""
         };
         status.value = await rpc.call("get_game_status", active.value);
     }
@@ -156,8 +171,10 @@ async function handler() {
                 <div class="status-ing" v-if="status === 'installing'">
                     <el-popover placement="top" trigger="hover">
                         <template #reference>
-                            <span>{{ String(Math.floor(download_progresses[active]?.percentage || 0)).padStart(2, '0') }}.{{
-                                String(Math.floor(((download_progresses[active]?.percentage || 0) % 1) * 100)).padStart(2, '0') }}%</span>
+                            <span>{{ String(Math.floor(download_progresses[active]?.percentage || 0)).padStart(2, '0')
+                            }}.{{
+                                    String(Math.floor(((download_progresses[active]?.percentage || 0) % 1) *
+                                        100)).padStart(2, '0') }}%</span>
                         </template>
                         <h1>2</h1>
                     </el-popover>

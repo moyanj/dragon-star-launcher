@@ -80,6 +80,7 @@ async def download_game(name: str):
         except Exception as e:
             print(f"下载失败: {str(e)}")
             download_progresses[name]["status"] = "failed"
+            download_progresses[name]["error_message"] = f"下载失败: {str(e)}"
         finally:
             if os.path.exists(os.path.join(download_path, "installing")):
                 os.remove(os.path.join(download_path, "installing"))
