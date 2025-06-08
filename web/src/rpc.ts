@@ -25,4 +25,5 @@ export type DownloadProgress = {
     downloaded: number,
     status: string,
     error_message: string
+    unzip_percentage: number
 }

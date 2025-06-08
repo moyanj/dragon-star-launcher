@@ -37,7 +37,8 @@ async def download_game(name: str):
         "percentage": 0.0,
         "total_size": 0,
         "downloaded": 0,
-        "status": "downloading"
+        "status": "downloading",
+        "unzip_percentage": 0.0  # 新增解压进度字段
     }
     
     def download_thread():
@@ -67,7 +68,14 @@ async def download_game(name: str):
             # 解压文件
             zip_file_path = os.path.join(download_path, f"{name}.zip")
             with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-                zip_ref.extractall(download_path)
+                total_files = len(zip_ref.infolist())
+                extracted_files = 0
+                for file in zip_ref.infolist():
+                    zip_ref.extract(file, download_path)
+                    extracted_files += 1
+                    download_progresses[name]["unzip_percentage"] = (extracted_files / total_files) * 100
+                    download_progresses[name]["status"] = "unzipping"  # 更新状态为解压中
+
             os.remove(zip_file_path)
 
             # 标记游戏为已安装
@@ -78,9 +86,9 @@ async def download_game(name: str):
             download_progresses[name]["status"] = "completed"
             
         except Exception as e:
-            print(f"下载失败: {str(e)}")
+            print(f"下载或解压失败: {str(e)}")
             download_progresses[name]["status"] = "failed"
-            download_progresses[name]["error_message"] = f"下载失败: {str(e)}"
+            download_progresses[name]["error_message"] = f"下载或解压失败: {str(e)}"
         finally:
             if os.path.exists(os.path.join(download_path, "installing")):
                 os.remove(os.path.join(download_path, "installing"))

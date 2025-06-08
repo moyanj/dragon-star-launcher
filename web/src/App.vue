@@ -63,7 +63,7 @@ async function update_progress() {
     if (download_progresses.value[active.value].status == "failed") {
         ElNotification({
             title: "错误",
-            message: "下载失败：" + download_progresses.value[active.value].error_message,
+            message: "下载或解压失败：" + download_progresses.value[active.value].error_message,
             type: "error",
         });
         status.value = await rpc.call("get_game_status", active.value);
@@ -72,6 +72,11 @@ async function update_progress() {
             progressInterval = null;
         }
         return
+    }
+    if (download_progresses.value[active.value].status == "unzipping") {
+        // 更新解压进度
+        const unzipPercentage = download_progresses.value[active.value].unzip_percentage || 0;
+        console.log(`解压进度: ${unzipPercentage.toFixed(2)}%`);
     }
     if (download_progresses.value[active.value].percentage >= 100) {
         ElNotification({
@@ -124,7 +129,8 @@ async function handler() {
             total_size: 0,
             downloaded: 0,
             status: "downloading",
-            error_message: ""
+            error_message: "",
+            unzip_percentage: 0.0
         };
         status.value = await rpc.call("get_game_status", active.value);
     }
@@ -172,11 +178,20 @@ async function handler() {
                     <el-popover placement="top" trigger="hover">
                         <template #reference>
                             <span>{{ String(Math.floor(download_progresses[active]?.percentage || 0)).padStart(2, '0')
-                            }}.{{
+                                }}.{{
                                     String(Math.floor(((download_progresses[active]?.percentage || 0) % 1) *
                                         100)).padStart(2, '0') }}%</span>
                         </template>
-                        <h1>2</h1>
+                        <div v-if="download_progresses[active]?.status === 'unzipping'">
+                            <h3>解压中...</h3>
+                            <el-progress :percentage="Math.floor(download_progresses[active]?.unzip_percentage || 0)"
+                                :show-text="false"></el-progress>
+                        </div>
+                        <div v-else>
+                            <h3>下载中...</h3>
+                            <el-progress :percentage="Math.floor(download_progresses[active]?.percentage || 0)"
+                                :show-text="false"></el-progress>
+                        </div>
                     </el-popover>
                 </div>
             </div>
