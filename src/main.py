@@ -75,7 +75,11 @@ else:
 
 
 # 创建WebView窗口
-@click.command()
+@click.command(
+    context_settings={
+        "ignore_unknown_options": True,
+    }
+)
 @click.option("--debug", is_flag=True, help="是否开启调试模式")
 @click.option("--width", default=1280, help="宽度")
 @click.option("--height", default=720, help="高度")
