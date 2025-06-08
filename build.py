@@ -58,9 +58,9 @@ def build_web():
 def build_server():
     os.chdir("src")
     if "debug" in sys.argv:
-        extra = "-w"
-    else:
         extra = "-c"
+    else:
+        extra = "-w"
     proc = subprocess.run(
         f"pyinstaller main.py --workpath ../build --distpath ../dist --specpath ../build --name StarGames --icon ../images/icon.ico --uac-admin --clean --noconfirm --contents-directory . {extra}",
         shell=True,
