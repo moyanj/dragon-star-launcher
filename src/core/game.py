@@ -109,6 +109,8 @@ async def download_game(name: str):
             if hasher.hexdigest() != game_hash:
                 download_progresses[name]["status"] = "failed"
                 download_progresses[name]["error_message"] = f"文件校验失败，请重新下载"
+                if os.path.exists(os.path.join(download_path, f"{name}.zip")):
+                    os.remove(os.path.join(download_path, f"{name}.zip"))
                 return
 
             # 解压文件
@@ -146,6 +148,8 @@ async def download_game(name: str):
             print(f"下载或解压失败: {str(e)}")
             download_progresses[name]["status"] = "failed"
             download_progresses[name]["error_message"] = f"安装失败: {str(e)}"
+            if os.path.exists(os.path.join(download_path, f"{name}.zip")):
+                os.remove(os.path.join(download_path, f"{name}.zip"))
         finally:
             if os.path.exists(os.path.join(download_path, "installing")):
                 os.remove(os.path.join(download_path, "installing"))
