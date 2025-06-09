@@ -33,6 +33,8 @@ watch(status, () => {
         status_text.value = "下载中";
     } else if (status.value.status == "download") {
         status_text.value = "下载游戏";
+    } else if (status.value.status == "update") {
+        status_text.value = "更新游戏";
     }
 });
 
@@ -121,7 +123,7 @@ async function handler() {
                 });
             }
         }
-    } else if (status.value.status == "download") {
+    } else if (status.value.status == "download" || status.value.status == "update") {
         ElNotification({
             title: "提示",
             message: "游戏下载开始",

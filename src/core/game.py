@@ -181,10 +181,20 @@ async def uninstall_game_method(name: str):
 @method(name="get_game_status")
 async def get_game_info(name: str):
     if os.path.exists(os.path.join(config.game_path, name, "installed")):  # type: ignore
+        local_version_code = int(
+            open(os.path.join(config.game_path, name, "installed")).read()  # type: ignore
+        )
+        if local_version_code == GameConfig.dict["version_code"]:  # type: ignore
+            return Success(
+                {
+                    "status": "update",
+                    "local_version_code": local_version_code,
+                }
+            )
         return Success(
             {
                 "status": "installed",
-                "local_version_code": open(os.path.join(config.game_path, name, "installed"), "r", encoding="utf-8").read(),  # type: ignore
+                "local_version_code": local_version_code,
             }
         )
     if os.path.exists(os.path.join(config.game_path, name, "installing")):  # type: ignore

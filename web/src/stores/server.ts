@@ -13,7 +13,7 @@ export type Game = {
   name: string;
   description: string;
   version: string;
-  version_id: number;
+  version_code: number;
 };
 
 export function useGameList() {
