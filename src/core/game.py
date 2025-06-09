@@ -109,6 +109,7 @@ async def download_game(name: str):
             if hasher.hexdigest() != game_hash:
                 download_progresses[name]["status"] = "failed"
                 download_progresses[name]["error_message"] = f"文件校验失败，请重新下载"
+                return
 
             # 解压文件
             zip_file_path = os.path.join(download_path, f"{name}.zip")
