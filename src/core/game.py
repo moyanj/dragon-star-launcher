@@ -1,9 +1,11 @@
+from attr import has
 from jsonrpcserver import method, Success, Error
 import os
 from env import *
 import subprocess
 import httpx
 import threading
+import xxhash
 import zipfile
 import shutil
 
@@ -44,15 +46,6 @@ def uninstall_game(name: str):
         return str(e)
 
 
-@method(name="get_game_status")
-async def get_game_staus(name: str):
-    if os.path.exists(os.path.join(config.game_path, name, "installed")):  # type: ignore
-        return Success("installed")
-    if os.path.exists(os.path.join(config.game_path, name, "installing")):  # type: ignore
-        return Success("installing")
-    return Success("download")
-
-
 @method(name="start_game")
 async def start_game(name: str):
     game_path = os.path.join(config.game_path, name, "start.bat")  # type: ignore
@@ -83,12 +76,16 @@ async def download_game(name: str):
     def download_thread():
         download_path = os.path.join(config.game_path, name)  # type: ignore
         try:
-            game_url = f"{SERVER_URL}/game_resouse/{name}.zip"
+            game_url = f"{SERVER_URL}/resources/{name}.zip"
 
             os.makedirs(download_path, exist_ok=True)
 
             with open(os.path.join(download_path, "installing"), "w") as f:
                 f.write("true")
+
+            # 修改: 正确获取并解析game_hash
+            game_hash_response = httpx.get(f"{SERVER_URL}/resources/{name}.hash")
+            game_hash = game_hash_response.text.strip()  # 确保获取的是纯文本内容
 
             with httpx.Client() as client:
                 with client.stream("GET", game_url) as response:
@@ -96,15 +93,22 @@ async def download_game(name: str):
                     download_progresses[name]["total_size"] = total_size
                     block_size = 1 * 1024 * 1024
                     progress = 0
+                    hasher = xxhash.xxh128()
 
                     with open(os.path.join(download_path, f"{name}.zip"), "wb") as f:
                         for data in response.iter_bytes(block_size):
                             f.write(data)
+                            hasher.update(data)
                             progress += len(data)
                             download_progresses[name]["downloaded"] = progress
                             download_progresses[name]["percentage"] = (
                                 progress / total_size
                             ) * 100
+
+            # 修改: 正确比较文件哈希值
+            if hasher.hexdigest() != game_hash:
+                download_progresses[name]["status"] = "failed"
+                download_progresses[name]["error_message"] = f"文件校验失败，请重新下载"
 
             # 解压文件
             zip_file_path = os.path.join(download_path, f"{name}.zip")
@@ -140,7 +144,7 @@ async def download_game(name: str):
         except Exception as e:
             print(f"下载或解压失败: {str(e)}")
             download_progresses[name]["status"] = "failed"
-            download_progresses[name]["error_message"] = f"下载或解压失败: {str(e)}"
+            download_progresses[name]["error_message"] = f"安装失败: {str(e)}"
         finally:
             if os.path.exists(os.path.join(download_path, "installing")):
                 os.remove(os.path.join(download_path, "installing"))
@@ -167,3 +171,25 @@ async def uninstall_game_method(name: str):
         return Success(message="游戏已成功卸载")
     if isinstance(code, str):
         return Error(message=code, code=500)
+
+
+@method(name="get_game_status")
+async def get_game_info(name: str):
+    if os.path.exists(os.path.join(config.game_path, name, "installed")):  # type: ignore
+        return Success(
+            {
+                "status": "installed",
+                "local_version_code": open(os.path.join(config.game_path, name, "installed"), "r", encoding="utf-8").read(),  # type: ignore
+            }
+        )
+    if os.path.exists(os.path.join(config.game_path, name, "installing")):  # type: ignore
+        return Success(
+            {
+                "status": "installing",
+            }
+        )
+    return Success(
+        {
+            "status": "download",
+        }
+    )

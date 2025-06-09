@@ -9,7 +9,7 @@ if (import.meta.env.DEV) {
 }
 
 interface RPCFunction {
-    "get_game_status": (name: string) => string;
+    "get_game_status": (name: string) => GameStatus;
     "start_game": (name: string) => string;
     "download_game": (name: string) => string;
     "get_download_progress": (n: string) => DownloadProgress;
@@ -28,4 +28,9 @@ export type DownloadProgress = {
     status: string,
     error_message: string
     unzip_percentage: number
+}
+
+export type GameStatus = {
+    status: string,
+    local_version_code: number | null
 }

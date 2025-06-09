@@ -2,12 +2,15 @@
 import { ElMenu, ElMenuItem, ElButton, ElNotification, ElProgress, ElPopover } from "element-plus";
 import { ref, watch, type Ref } from "vue";
 import { useGameList, server_url } from "./stores/server";
-import { rpc, type DownloadProgress } from "./rpc";
+import { rpc, type DownloadProgress, type GameStatus } from "./rpc";
 import { RPCError } from "jsonrpctts";
 
 const game_list = useGameList();
 const active = ref();
-const status = ref("download")
+const status: Ref<GameStatus> = ref({
+    "status": "download",
+    "local_version_code": null
+})
 const status_text = ref("开始游戏");
 let progressInterval: number | null = null;
 const download_progresses: Ref<{ [key: string]: DownloadProgress }> = ref({});
@@ -24,17 +27,17 @@ watch(active, async () => {
 });
 
 watch(status, () => {
-    if (status.value == "installed") {
+    if (status.value.status == "installed") {
         status_text.value = "开始游戏";
-    } else if (status.value == "installing") {
+    } else if (status.value.status == "installing") {
         status_text.value = "下载中";
-    } else if (status.value == "download") {
+    } else if (status.value.status == "download") {
         status_text.value = "下载游戏";
     }
 });
 
 watch(status, async (newStatus) => {
-    if (newStatus === "installing") {
+    if (newStatus.status === "installing") {
         // 清除旧的定时器（如果存在）
         if (progressInterval !== null) {
             clearInterval(progressInterval);
@@ -94,7 +97,7 @@ async function update_progress() {
 }
 
 async function handler() {
-    if (status.value == "installed") {
+    if (status.value.status == "installed") {
         try {
             await rpc.call("start_game", active.value)
             // 游戏启动成功时显示成功提示
@@ -118,7 +121,7 @@ async function handler() {
                 });
             }
         }
-    } else if (status.value == "download") {
+    } else if (status.value.status == "download") {
         ElNotification({
             title: "提示",
             message: "游戏下载开始",
@@ -162,20 +165,20 @@ async function handler() {
     <div class="content" :style="{ backgroundImage: `url(${server_url}/background/${active}.jpg)` }">
         <div class="start" @click="handler">
             <div class="status">
-                <div class="status-ready" v-if="status === 'installed'">
+                <div class="status-ready" v-if="status.status === 'installed'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"
                         class="status-icon">
                         <path fill="currentColor"
                             d="M8 17.175V6.825q0-.425.3-.713t.7-.287q.125 0 .263.037t.262.113l8.15 5.175q.225.15.338.375t.112.475t-.112.475t-.338.375l-8.15 5.175q-.125.075-.262.113T9 18.175q-.4 0-.7-.288t-.3-.712" />
                     </svg>
                 </div>
-                <div class="status-no" v-if="status === 'download'">
+                <div class="status-no" v-if="status.status === 'download'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24">
                         <path fill="currentColor"
                             d="M5 10H4V8h2v1h1v1h1v1h1v1h1V1h2v12h1v-1h1v-1h1v-1h1v-1h1V9h1V8h2v2h-1v1h-1v1h-1v1h-1v1h-1v1h-2v-1h-1v-1H9v-1H8v-1H7v-1H6v-1H5zM2 21h20v2H2z" />
                     </svg>
                 </div>
-                <div class="status-ing" v-if="status === 'installing'">
+                <div class="status-ing" v-if="status.status === 'installing'">
                     <el-popover placement="top" trigger="hover">
                         <template #reference>
                             <span>{{ String(Math.floor(download_progresses[active]?.percentage || 0)).padStart(2, '0')
