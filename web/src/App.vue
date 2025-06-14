@@ -1,5 +1,5 @@
 <script setup lang="ts" async>
-import { ElMenu, ElMenuItem, ElButton, ElNotification, ElProgress, ElPopover } from "element-plus";
+import { ElMenu, ElMenuItem, ElButton, ElNotification, ElProgress, ElPopover, ElTooltip } from "element-plus";
 import { ref, watch, type Ref } from "vue";
 import { useGameList, server_url } from "./stores/server";
 import { rpc, type DownloadProgress, type GameStatus } from "./rpc";
@@ -148,11 +148,19 @@ async function handler() {
 
     <div class="menu">
         <el-menu :default-active="active" :collapse="false">
-            <el-menu-item v-for="item in game_list" @click="changeMenu(item.id)" :index="item.id"
-                :class="{ 'is-active': active === item }">
-                <img :src="server_url + '/icon/' + item.id + '.png'" class="icon" />
-            </el-menu-item>
-
+            <el-tooltip placement="right" content="菜单" effect="light" v-for="item in game_list">
+                <el-menu-item @click="changeMenu(item.id)" :index="item.id" :class="{ 'is-active': active === item }">
+                    <img :src="server_url + '/icon/' + item.id + '.png'" class="icon" />
+                </el-menu-item>
+                <template #content>
+                    <div class="menu-title">
+                        <div class="menu-title-text">
+                            <div class="menu-title-text-name">{{ item.name }}</div>
+                            <div class="menu-title-text-desc">介绍:{{ item.description }}</div>
+                        </div>
+                    </div>
+                </template>
+            </el-tooltip>
             <div class="setting">
                 <el-button>
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 1024 1024"
@@ -184,7 +192,7 @@ async function handler() {
                     <el-popover placement="top" trigger="hover">
                         <template #reference>
                             <span>{{ String(Math.floor(download_progresses[active]?.percentage || 0)).padStart(2, '0')
-                                }}.{{
+                            }}.{{
                                     String(Math.floor(((download_progresses[active]?.percentage || 0) % 1) *
                                         100)).padStart(2, '0') }}%</span>
                         </template>

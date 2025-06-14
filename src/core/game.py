@@ -75,6 +75,8 @@ async def download_game(name: str):
 
     def download_thread():
         download_path = os.path.join(config.game_path, name)  # type: ignore
+
+        zip_file_path = os.path.join(download_path, f"{name}.zip")
         try:
             game_url = f"{SERVER_URL}/resources/{name}.zip"
 
@@ -86,16 +88,28 @@ async def download_game(name: str):
             # 修改: 正确获取并解析game_hash
             game_hash_response = httpx.get(f"{SERVER_URL}/resources/{name}.hash")
             game_hash = game_hash_response.text.strip()  # 确保获取的是纯文本内容
+            start_byte = 0
+            headers = {}
+
+            # 检查是否已有部分下载的文件
+            if os.path.exists(zip_file_path):
+                start_byte = os.path.getsize(zip_file_path)
+                headers = {"Range": f"bytes={start_byte}-"}
 
             with httpx.Client() as client:
-                with client.stream("GET", game_url) as response:
-                    total_size = int(response.headers.get("content-length", 0))
+                with client.stream("GET", game_url, headers=headers) as response:
+                    if response.status_code == 206:  # 部分内容状态码
+                        total_size = (
+                            int(response.headers.get("content-length", 0)) + start_byte
+                        )
+                    else:
+                        total_size = int(response.headers.get("content-length", 0))
                     download_progresses[name]["total_size"] = total_size
                     block_size = 1 * 1024 * 1024
-                    progress = 0
+                    progress = start_byte
                     hasher = xxhash.xxh128()
 
-                    with open(os.path.join(download_path, f"{name}.zip"), "wb") as f:
+                    with open(zip_file_path, "ab" if start_byte > 0 else "wb") as f:
                         for data in response.iter_bytes(block_size):
                             f.write(data)
                             hasher.update(data)
@@ -109,12 +123,11 @@ async def download_game(name: str):
             if hasher.hexdigest() != game_hash:
                 download_progresses[name]["status"] = "failed"
                 download_progresses[name]["error_message"] = f"文件校验失败，请重新下载"
-                if os.path.exists(os.path.join(download_path, f"{name}.zip")):
-                    os.remove(os.path.join(download_path, f"{name}.zip"))
+                if os.path.exists(zip_file_path):
+                    os.remove(zip_file_path)
                 return
 
             # 解压文件
-            zip_file_path = os.path.join(download_path, f"{name}.zip")
             installed_files = []  # 创建一个列表来存储解压后的文件
             with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
                 total_files = len(zip_ref.infolist())
@@ -148,8 +161,8 @@ async def download_game(name: str):
             print(f"下载或解压失败: {str(e)}")
             download_progresses[name]["status"] = "failed"
             download_progresses[name]["error_message"] = f"安装失败: {str(e)}"
-            if os.path.exists(os.path.join(download_path, f"{name}.zip")):
-                os.remove(os.path.join(download_path, f"{name}.zip"))
+            if os.path.exists(zip_file_path):
+                os.remove(zip_file_path)
         finally:
             if os.path.exists(os.path.join(download_path, "installing")):
                 os.remove(os.path.join(download_path, "installing"))
