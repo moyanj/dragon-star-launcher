@@ -152,7 +152,7 @@ async def download_game(name: str):
 
             # 标记游戏为已安装
             with open(os.path.join(download_path, "installed"), "w") as f:
-                f.write(GameConfig.dict["version_code"])
+                f.write(GameConfig.dict[name]["version_code"])
             download_progresses[name]["downloaded"] = total_size
             download_progresses[name]["percentage"] = 100.0
             download_progresses[name]["status"] = "completed"
