@@ -1,5 +1,5 @@
 <script setup lang="ts" async>
-import { ElMenu, ElMenuItem, ElButton, ElNotification, ElProgress, ElPopover, ElTooltip } from "element-plus";
+import { ElMenu, ElMenuItem, ElButton, ElNotification, ElProgress, ElPopover, ElTooltip, ElDialog } from "element-plus";
 import { ref, watch, type Ref } from "vue";
 import { useGameList, server_url } from "./stores/server";
 import { rpc, type DownloadProgress, type GameStatus } from "./rpc";
@@ -192,7 +192,7 @@ async function handler() {
                     <el-popover placement="top" trigger="hover">
                         <template #reference>
                             <span>{{ String(Math.floor(download_progresses[active]?.percentage || 0)).padStart(2, '0')
-                            }}.{{
+                                }}.{{
                                     String(Math.floor(((download_progresses[active]?.percentage || 0) % 1) *
                                         100)).padStart(2, '0') }}%</span>
                         </template>
