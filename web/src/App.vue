@@ -142,6 +142,18 @@ async function handler() {
     }
 }
 
+fetch(server_url + "/notice.txt")
+    .then(response => response.text()).then(data => {
+        if (data == "") return;
+        data = data.replace(/\n/g, "<br>");
+
+        ElNotification({
+            title: "公告",
+            message: data,
+            type: "info",
+        });
+    });
+
 </script>
 
 <template>
@@ -192,7 +204,7 @@ async function handler() {
                     <el-popover placement="top" trigger="hover">
                         <template #reference>
                             <span>{{ String(Math.floor(download_progresses[active]?.percentage || 0)).padStart(2, '0')
-                                }}.{{
+                            }}.{{
                                     String(Math.floor(((download_progresses[active]?.percentage || 0) % 1) *
                                         100)).padStart(2, '0') }}%</span>
                         </template>
