@@ -62,7 +62,7 @@ def build_server():
     else:
         extra = "-w"
     proc = subprocess.run(
-        f"pyinstaller main.py --workpath ../build --distpath ../dist --specpath ../build --name StarGames --icon ../images/icon.ico --uac-admin --clean --noconfirm --contents-directory . {extra}",
+        f"pyinstaller main.py --workpath ../build --distpath ../dist --specpath ../build --name StarGames --icon ../images/icon.ico --uac-admin --clean --noconfirm --contents-directory src {extra}",
         shell=True,
     )
     proc.check_returncode()
