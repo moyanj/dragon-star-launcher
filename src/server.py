@@ -16,11 +16,14 @@ import core
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global VERSION
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(f"{SERVER_URL}/game.yml")
             response.raise_for_status()
             GameConfig.set_conf(yaml.safe_load(response.text))
+            response = await client.get(f"{SERVER_URL}/version")
+            VERSION = int(response.text.strip())
     except Exception:
         tkinter.messagebox.showerror("错误", "无法连接至服务器")
         sys.exit(1)

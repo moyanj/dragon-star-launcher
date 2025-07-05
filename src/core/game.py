@@ -1,4 +1,3 @@
-from attr import has
 from jsonrpcserver import method, Success, Error
 import os
 from env import *

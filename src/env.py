@@ -15,6 +15,7 @@ __all__ = [
     "build_info",
     "SERVER_URL",
     "GameConfig",
+    "VERSION",
 ]
 
 DEBUG = True if "--debug" in sys.argv else False  # 是否为调试模式
@@ -56,3 +57,5 @@ config = Config(json.load(config_fp))  # 配置文件
 os.makedirs(config.game_path, exist_ok=True)  # type: ignore
 
 GameConfig = ServerConfig(None)
+
+VERSION = 1145141919180
